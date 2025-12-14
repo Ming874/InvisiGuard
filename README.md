@@ -1,3 +1,40 @@
+# InvisiGuard
+
+Invisible Watermarking & Geometric Correction System.
+
+## Features
+- **Invisible Watermarking**: Embed text into images using DCT and HVS masking.
+- **Robust Extraction**: Recover watermarks even after rotation, scaling, and cropping.
+- **Attack Simulation**: Test robustness with built-in attack tools.
+
+## Quick Start
+
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 8000
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## API Documentation
+Once the backend is running, visit:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Usage
+1. Open http://localhost:5173
+2. Go to "Embed" tab to watermark an image.
+3. Download the result.
+4. Go to "Extract" tab (or use the simulator).
+5. Upload Original and Suspect images to recover the watermark.
+
 ## Spec Kit Integration
 
 - **Install `uv`**: Install Astral `uv` if not already installed.
