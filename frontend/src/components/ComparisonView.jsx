@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
-export default function ComparisonView({ originalUrl, processedUrl, metrics }) {
+export default function ComparisonView({ originalUrl, processedUrl, signalMapUrl, metrics }) {
+  const [viewMode, setViewMode] = useState('processed')
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    if (!originalUrl || !processedUrl || !canvasRef.current) return
+    if (viewMode !== 'diff' || !originalUrl || !processedUrl || !canvasRef.current) return
 
     const img1 = new Image()
     const img2 = new Image()
@@ -54,18 +55,51 @@ export default function ComparisonView({ originalUrl, processedUrl, metrics }) {
     img1.src = originalUrl
     img2.src = processedUrl
 
-  }, [originalUrl, processedUrl])
+  }, [originalUrl, processedUrl, viewMode])
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-center space-x-4 mb-4">
+        <button 
+          onClick={() => setViewMode('processed')}
+          className={`px-3 py-1 rounded ${viewMode === 'processed' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          Watermarked
+        </button>
+        <button 
+          onClick={() => setViewMode('diff')}
+          className={`px-3 py-1 rounded ${viewMode === 'diff' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          Diff Map
+        </button>
+        {signalMapUrl && (
+          <button 
+            onClick={() => setViewMode('signal')}
+            className={`px-3 py-1 rounded ${viewMode === 'signal' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          >
+            Signal Map
+          </button>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <h4 className="font-medium text-gray-700">Original</h4>
           <img src={originalUrl} alt="Original" className="w-full rounded shadow" />
         </div>
         <div className="space-y-2">
-          <h4 className="font-medium text-gray-700">Watermarked</h4>
-          <img src={processedUrl} alt="Watermarked" className="w-full rounded shadow" />
+          <h4 className="font-medium text-gray-700">
+            {viewMode === 'processed' ? 'Watermarked' : viewMode === 'diff' ? 'Difference Map' : 'Signal Map'}
+          </h4>
+          {viewMode === 'processed' && (
+            <img src={processedUrl} alt="Watermarked" className="w-full rounded shadow" />
+          )}
+          {viewMode === 'diff' && (
+            <canvas ref={canvasRef} className="w-full rounded shadow border bg-black" />
+          )}
+          {viewMode === 'signal' && (
+            <img src={signalMapUrl} alt="Signal Map" className="w-full rounded shadow" />
+          )}
         </div>
       </div>
 
@@ -78,11 +112,6 @@ export default function ComparisonView({ originalUrl, processedUrl, metrics }) {
           </div>
         </div>
       )}
-
-      <div className="space-y-2">
-        <h4 className="font-medium text-gray-700">Difference Map (Amplified 10x)</h4>
-        <canvas ref={canvasRef} className="w-full rounded shadow border bg-black" />
-      </div>
     </div>
   )
 }

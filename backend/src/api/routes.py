@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from src.api.schemas import WatermarkResponse, ExtractionResponse, WatermarkResponseData
+from src.api.schemas import WatermarkResponse, ExtractionResponse, WatermarkResponseData, ExtractionResponseData, VerificationResponse, VerificationResponseData
 from src.core.processor import ImageProcessor
 from src.services.watermark import WatermarkService
 
@@ -53,6 +53,26 @@ async def extract_watermark(
                 is_match=True,
                 debug_info=None
             )
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/verify", response_model=VerificationResponse)
+async def verify_watermark(
+    image: UploadFile = File(...)
+):
+    try:
+        # Load image
+        suspect = await ImageProcessor.load_image(image)
+        
+        # Process
+        result = await watermark_service.verify(suspect)
+        
+        return VerificationResponse(
+            status="success",
+            data=VerificationResponseData(**result)
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

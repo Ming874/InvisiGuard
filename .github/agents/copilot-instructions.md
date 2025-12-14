@@ -28,7 +28,7 @@ cd src; pytest; ruff check .
 
 ## Recent Changes
 - 002-blind-verification: Added Python 3.10+ (Backend), TypeScript/React (Frontend) + FastAPI, OpenCV (headless), NumPy, SciPy
-- 001-invisiguard-core: Added Python 3.11+, Node.js 18+ + FastAPI, OpenCV (headless), NumPy, SciPy, React, Vite, Tailwind CSS
+- 002-blind-verification: Added Python 3.10+ (Backend), TypeScript/React (Frontend) + FastAPI, OpenCV (headless), NumPy, SciPy
 - 001-invisiguard-core: Added Python 3.11+, Node.js 18+ + FastAPI, OpenCV (headless), NumPy, SciPy, React, Vite, Tailwind CSS
 
 

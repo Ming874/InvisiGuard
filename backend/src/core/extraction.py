@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy.fftpack import dct
+from .geometry import detect_rotation_scale, correct_geometry, SynchTemplate
 
 class WatermarkExtractor:
     def __init__(self, block_size: int = 8):
@@ -69,3 +70,23 @@ class WatermarkExtractor:
                     bits.append(0)
         
         return self.bits_to_text(bits)
+
+    def extract_with_blind_alignment(self, image: np.ndarray) -> tuple[str, dict]:
+        """
+        Extract watermark with blind geometric correction.
+        Returns (text, metadata).
+        """
+        template = SynchTemplate()
+        rotation, scale = detect_rotation_scale(image, template)
+        
+        corrected_image = correct_geometry(image, rotation, scale)
+        
+        text = self.extract_watermark_dct(corrected_image)
+        
+        metadata = {
+            "rotation_detected": rotation,
+            "scale_detected": scale,
+            "geometry_corrected": True
+        }
+        
+        return text, metadata

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy.fftpack import dct, idct
+from .geometry import embed_synch_template, SynchTemplate
 
 class WatermarkEmbedder:
     def __init__(self, block_size: int = 8):
@@ -127,5 +128,9 @@ class WatermarkEmbedder:
             watermarked = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR)
         else:
             watermarked = processed_y
+            
+        # Apply Synchronization Template
+        template = SynchTemplate()
+        watermarked = embed_synch_template(watermarked, template)
             
         return watermarked

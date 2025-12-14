@@ -3,6 +3,7 @@ import cv2
 from src.core.embedding import WatermarkEmbedder
 from src.core.extraction import WatermarkExtractor
 from src.core.geometry import GeometryProcessor
+from src.core.visualization import generate_signal_heatmap
 from src.core.processor import ImageProcessor
 import os
 import uuid
@@ -22,17 +23,25 @@ class WatermarkService:
         # 1. Embed watermark
         watermarked_image = self.embedder.embed_watermark_dct(image, text, alpha)
         
-        # 2. Calculate metrics (PSNR, SSIM)
+        # 2. Generate Signal Map
+        signal_map = generate_signal_heatmap(image, watermarked_image)
+        
+        # 3. Calculate metrics (PSNR, SSIM)
         psnr = self._calculate_psnr(image, watermarked_image)
         ssim = self._calculate_ssim(image, watermarked_image)
         
-        # 3. Save result
+        # 4. Save result
         filename = f"{uuid.uuid4()}.png"
         output_path = os.path.join("static/processed", filename)
         self.processor.save_image(watermarked_image, output_path)
         
+        signal_filename = f"signal_{filename}"
+        signal_path = os.path.join("static/processed", signal_filename)
+        self.processor.save_image(signal_map, signal_path)
+        
         return {
             "image_url": f"/static/processed/{filename}",
+            "signal_map_url": f"/static/processed/{signal_filename}",
             "psnr": round(psnr, 2),
             "ssim": round(ssim, 4)
         }
@@ -57,6 +66,23 @@ class WatermarkService:
         return {
             "extracted_text": text,
             "status": status
+        }
+
+    async def verify(self, suspect: np.ndarray) -> dict:
+        """
+        Orchestrate the blind verification process.
+        """
+        # 1. Extract with blind alignment
+        text, metadata = self.extractor.extract_with_blind_alignment(suspect)
+        
+        # 2. Determine verification status
+        verified = bool(text and len(text) > 0)
+        
+        return {
+            "verified": verified,
+            "watermark_text": text,
+            "confidence": 1.0 if verified else 0.0,
+            "metadata": metadata
         }
 
     def _calculate_psnr(self, img1: np.ndarray, img2: np.ndarray) -> float:
