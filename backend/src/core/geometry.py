@@ -56,9 +56,9 @@ class GeometryProcessor:
         num_good_matches = max(num_good_matches, 10) # Ensure at least 10 matches if possible
         
         if len(matches) < num_good_matches:
-             good_matches = matches
+            good_matches = matches
         else:
-             good_matches = matches[:num_good_matches]
+            good_matches = matches[:num_good_matches]
 
         if len(good_matches) < 4:
             print("Not enough matches to compute homography.")
@@ -83,3 +83,36 @@ class GeometryProcessor:
         aligned_img = cv2.warpPerspective(suspect, M, (w, h))
 
         return aligned_img
+
+class SynchTemplate:
+    """
+    Configuration for the DFT synchronization template.
+    """
+    def __init__(self, radius: int = 50, angle: float = 45.0, strength: float = 5.0, peak_width: int = 3):
+        self.radius = radius
+        self.angle = angle
+        self.strength = strength
+        self.peak_width = peak_width
+
+def embed_synch_template(image: np.ndarray, template: SynchTemplate) -> np.ndarray:
+    """
+    Embeds a synchronization template (peaks) into the DFT magnitude spectrum of the image.
+    """
+    # TODO: Implement DFT embedding
+    return image
+
+def detect_rotation_scale(image: np.ndarray, template: SynchTemplate) -> Tuple[float, float]:
+    """
+    Detects rotation and scale from the image using the synchronization template.
+    Returns (rotation_degrees, scale_factor).
+    """
+    # TODO: Implement DFT peak detection
+    return 0.0, 1.0
+
+def correct_geometry(image: np.ndarray, rotation: float, scale: float) -> np.ndarray:
+    """
+    Corrects the geometry of the image based on detected rotation and scale.
+    """
+    # TODO: Implement geometric correction
+    return image
+
