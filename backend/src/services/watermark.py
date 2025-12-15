@@ -20,8 +20,8 @@ class WatermarkService:
         Orchestrate the embedding process.
         Returns dict with paths and metrics.
         """
-        # 1. Embed watermark
-        watermarked_image = self.embedder.embed_watermark_dct(image, text, alpha)
+        # 1. Embed watermark using the new DWT+QIM method
+        watermarked_image = self.embedder.embed_watermark_dwt_qim(image, text, alpha)
         
         # 2. Generate Signal Map
         signal_map = generate_signal_heatmap(image, watermarked_image)
@@ -61,7 +61,9 @@ class WatermarkService:
             status = "aligned"
             
         # 2. Extract watermark
-        text = self.extractor.extract_watermark_dct(aligned)
+        # The alpha/delta value must match the one used during embedding.
+        # The default is 10.0 in both, which is consistent for now.
+        text = self.extractor.extract_watermark_dwt_qim(aligned)
         
         return {
             "extracted_text": text,

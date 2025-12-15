@@ -84,7 +84,7 @@ function App() {
 
         setLoading(true)
         try {
-            const resp = await fetch(`http://localhost:8000${result.image_url}`)
+            const resp = await fetch(result.image_url)
             if (!resp.ok) throw new Error('Download failed')
             const blob = await resp.blob()
             const url = URL.createObjectURL(blob)
@@ -175,8 +175,8 @@ function App() {
                                         <h2 className="text-xl font-semibold mb-4">Result Analysis</h2>
                                         <ComparisonView
                                             originalUrl={originalPreview}
-                                            processedUrl={`http://localhost:8000${result.image_url}`}
-                                            signalMapUrl={result.signal_map_url ? `http://localhost:8000${result.signal_map_url}` : null}
+                                            processedUrl={result.image_url}
+                                            signalMapUrl={result.signal_map_url ? result.signal_map_url : null}
                                             metrics={{ psnr: result.psnr, ssim: result.ssim }}
                                         />
                                         <div className="mt-4 flex justify-end">
