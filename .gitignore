@@ -29,3 +29,7 @@ Thumbs.db
 # Project specific
 backend/static/processed/
 backend/static/debug/
+
+# Exclude spec and test directories
+spec/
+test/
