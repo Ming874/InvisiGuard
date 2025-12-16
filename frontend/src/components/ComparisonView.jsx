@@ -13,13 +13,12 @@ export default function ComparisonView({ originalUrl, processedUrl, signalMapUrl
 
     const drawDiff = () => {
       const canvas = canvasRef.current
+      if (!canvas) return
       const ctx = canvas.getContext('2d')
       
-      // Set dimensions
       canvas.width = img1.width
       canvas.height = img1.height
       
-      // Draw images to offscreen canvases to get data
       const c1 = document.createElement('canvas')
       const c2 = document.createElement('canvas')
       c1.width = c2.width = img1.width
@@ -58,57 +57,74 @@ export default function ComparisonView({ originalUrl, processedUrl, signalMapUrl
   }, [originalUrl, processedUrl, viewMode])
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-center space-x-4 mb-4">
-        <button 
-          onClick={() => setViewMode('processed')}
-          className={`px-3 py-1 rounded ${viewMode === 'processed' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-        >
-          Watermarked
-        </button>
-        <button 
-          onClick={() => setViewMode('diff')}
-          className={`px-3 py-1 rounded ${viewMode === 'diff' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-        >
-          Diff Map
-        </button>
-        {signalMapUrl && (
-          <button 
-            onClick={() => setViewMode('signal')}
-            className={`px-3 py-1 rounded ${viewMode === 'signal' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          >
-            Signal Map
-          </button>
-        )}
+    <div className="space-y-8">
+      <div className="flex justify-center">
+          <div className="bg-slate-100 p-1 rounded-xl flex">
+            {['processed', 'diff', 'signal'].map(mode => {
+                if (mode === 'signal' && !signalMapUrl) return null
+                return (
+                    <button
+                        key={mode}
+                        onClick={() => setViewMode(mode)}
+                        className={`
+                            px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize
+                            ${viewMode === mode 
+                                ? 'bg-white text-blue-600 shadow-sm' 
+                                : 'text-slate-500 hover:text-slate-700'}
+                        `}
+                    >
+                        {mode === 'processed' ? 'Watermarked Result' : mode === 'diff' ? 'Difference Map' : 'Signal Map'}
+                    </button>
+                )
+            })}
+          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-700">Original</h4>
-          <img src={originalUrl} alt="Original" className="w-full rounded shadow" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider text-center">Original</h4>
+          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 aspect-auto relative group">
+              <img src={originalUrl} alt="Original" className="w-full h-full object-contain" />
+          </div>
         </div>
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-700">
-            {viewMode === 'processed' ? 'Watermarked' : viewMode === 'diff' ? 'Difference Map' : 'Signal Map'}
+        
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider text-center">
+            {viewMode === 'processed' ? 'Watermarked' : viewMode === 'diff' ? 'Difference Analysis' : 'HVS Signal Map'}
           </h4>
-          {viewMode === 'processed' && (
-            <img src={processedUrl} alt="Watermarked" className="w-full rounded shadow" />
-          )}
-          {viewMode === 'diff' && (
-            <canvas ref={canvasRef} className="w-full rounded shadow border bg-black" />
-          )}
-          {viewMode === 'signal' && (
-            <img src={signalMapUrl} alt="Signal Map" className="w-full rounded shadow" />
-          )}
+          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 aspect-auto relative group">
+              {viewMode === 'processed' && (
+                <img src={processedUrl} alt="Watermarked" className="w-full h-full object-contain" />
+              )}
+              {viewMode === 'diff' && (
+                <canvas ref={canvasRef} className="w-full h-full object-contain bg-black/90" />
+              )}
+              {viewMode === 'signal' && (
+                <img src={signalMapUrl} alt="Signal Map" className="w-full h-full object-contain" />
+              )}
+          </div>
         </div>
       </div>
 
       {metrics && (
-        <div className="bg-gray-50 p-4 rounded border">
-          <h4 className="font-medium mb-2">Quality Metrics</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>PSNR: <span className="font-mono font-bold">{metrics.psnr} dB</span></div>
-            <div>SSIM: <span className="font-mono font-bold">{metrics.ssim}</span></div>
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+          <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+            </svg>
+            Quality Metrics
+          </h4>
+          <div className="grid grid-cols-2 gap-8">
+            <div className="relative pl-4 border-l-2 border-blue-500">
+                <div className="text-xs text-slate-500 font-medium">PSNR (Peak Signal-to-Noise Ratio)</div>
+                <div className="text-2xl font-mono font-bold text-slate-800 mt-1">{metrics.psnr} <span className="text-sm text-slate-400 font-normal">dB</span></div>
+                <div className="text-xs text-slate-400 mt-1">Higher is better (&gt;30dB is good)</div>
+            </div>
+            <div className="relative pl-4 border-l-2 border-emerald-500">
+                <div className="text-xs text-slate-500 font-medium">SSIM (Structural Similarity)</div>
+                <div className="text-2xl font-mono font-bold text-slate-800 mt-1">{metrics.ssim}</div>
+                <div className="text-xs text-slate-400 mt-1">Max 1.0 (1.0 = identical)</div>
+            </div>
           </div>
         </div>
       )}
