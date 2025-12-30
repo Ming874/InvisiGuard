@@ -107,16 +107,11 @@ class WatermarkService:
         return 20 * np.log10(255.0 / np.sqrt(mse))
 
     def _calculate_ssim(self, img1: np.ndarray, img2: np.ndarray) -> float:
-        # Simplified SSIM or use skimage.metrics.structural_similarity
-        # For MVP, let's use a placeholder or simple calculation
-        # Since we don't have skimage in requirements (only scipy/numpy/cv2), 
-        # we can implement a basic one or just return a placeholder if complex.
-        # Let's stick to a basic estimation or just PSNR for now if SSIM is too complex to implement from scratch.
-        # Actually, let's try to import structural_similarity if available, else return 0.
         try:
             from skimage.metrics import structural_similarity
             gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
             gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
             return structural_similarity(gray1, gray2)
         except ImportError:
+            print("Warning: scikit-image not found. SSIM calculation skipped.")
             return 0.0

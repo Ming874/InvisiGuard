@@ -9,7 +9,7 @@ from src.utils.logger import get_logger
 # T028: 演算法參數常數 - 必須與 embedding.py 中的參數一致
 WAVELET = 'haar'  # DWT使用的小波類型
 LEVEL = 1  # DWT分解層級
-DELTA = 10.0  # QIM量化步長 - 對於嵌入和提取的一致性至關重要
+BASE_DELTA = 10.0  # QIM量化步長基準 - 最終步長 delta = BASE_DELTA * alpha
 
 # Reed-Solomon 參數 (必須與嵌入器匹配) - 為抗裁切而增強
 N_ECC_SYMBOLS = 30  # 可校正最多 15 個字節的錯誤
@@ -115,10 +115,12 @@ class WatermarkExtractor:
             logger.error(f"[RS] 未預期的錯誤: {type(e).__name__}: {str(e)}")
             return f"Reed-Solomon解碼錯誤: {type(e).__name__} - {str(e)}"
 
-    def extract_watermark_dwt_qim(self, image: np.ndarray, alpha: float = 10.0) -> str:
+    def extract_watermark_dwt_qim(self, image: np.ndarray, alpha: float = 1.0) -> str:
         """使用 DWT 和 QIM 提取浮水印。"""
         
-        logger.debug(f"[Extract] 參數: WAVELET={WAVELET}, LEVEL={LEVEL}, DELTA={DELTA}")
+        # 計算實際的量化步長
+        delta = BASE_DELTA * alpha
+        logger.debug(f"[Extract] 參數: WAVELET={WAVELET}, LEVEL={LEVEL}, BASE_DELTA={BASE_DELTA}, delta={delta}")
         
         # --- 圖像預處理 ---
         # 與嵌入過程相同，只處理Y通道。
@@ -148,7 +150,7 @@ class WatermarkExtractor:
         
         for i in range(num_bits_to_extract):
             c = ll_flat[i]  # 獲取LL係數
-            q = round(c / DELTA)  # 計算量化索引
+            q = round(c / delta)  # 計算量化索引
             
             # 檢查 q 的奇偶性來確定嵌入的位元是0還是1。
             if q % 2 == 0:

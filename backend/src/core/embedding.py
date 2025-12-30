@@ -9,7 +9,7 @@ from src.utils.logger import get_logger
 # T027: 演算法參數常數 - 必須與 extraction.py 中的參數一致
 WAVELET = 'haar'  # DWT使用的小波類型
 LEVEL = 1  # DWT分解層級
-DELTA = 10.0  # QIM量化步長 - 對於嵌入和提取的一致性至關重要
+BASE_DELTA = 10.0  # QIM量化步長基準 - 最終步長 delta = BASE_DELTA * alpha
 
 # Reed-Solomon 參數 - 為抗裁切而增強
 N_ECC_SYMBOLS = 30  # ECC（錯誤校正碼）符號的數量（可校正 N_ECC_SYMBOLS / 2 = 15 個錯誤）
@@ -85,10 +85,12 @@ class WatermarkEmbedder:
             encoded_bits.extend([int(b) for b in binval])
         return encoded_bits
 
-    def embed_watermark_dwt_qim(self, image: np.ndarray, text: str, alpha: float = 10.0) -> np.ndarray:
+    def embed_watermark_dwt_qim(self, image: np.ndarray, text: str, alpha: float = 1.0) -> np.ndarray:
         """使用DWT和QIM嵌入浮水印。"""
         
-        logger.debug(f"[Embed] 參數: WAVELET={WAVELET}, LEVEL={LEVEL}, DELTA={DELTA}, alpha={alpha}")
+        # 計算實際的量化步長
+        delta = BASE_DELTA * alpha
+        logger.debug(f"[Embed] 參數: WAVELET={WAVELET}, LEVEL={LEVEL}, BASE_DELTA={BASE_DELTA}, alpha={alpha}, delta={delta}")
         
         # --- 1. 圖像預處理 ---
         # 如果圖像有顏色，我們將其轉換為 YUV 色彩空間。
@@ -132,8 +134,8 @@ class WatermarkEmbedder:
             c = ll_flat[i]  # 獲取一個LL係數
             b = bits[i]     # 獲取要嵌入的位元 (0 或 1)
             
-            # 將係數除以DELTA並四捨五入，得到量化索引q。
-            q = round(c / DELTA)
+            # 將係數除以delta並四捨五入，得到量化索引q。
+            q = round(c / delta)
             
             # 根據要嵌入的位元調整q的奇偶性。
             # 如果位元是0，q必須是偶數。
@@ -144,7 +146,7 @@ class WatermarkEmbedder:
                 q += 1
             
             # 用新的q重新計算係數，從而嵌入位元。
-            ll_flat[i] = q * DELTA
+            ll_flat[i] = q * delta
             
         LL_w = ll_flat.reshape(LL.shape)
         

@@ -29,10 +29,12 @@ InvisiGuard is an invisible watermarking system that embeds textual data into di
 cd backend
 # Create and activate a virtual environment
 python -m venv .venv
+
 # On Windows
-# .venv\Scripts\activate
+.venv\Scripts\activate
 # On macOS/Linux
 source .venv/bin/activate
+
 # Install dependencies
 pip install -r requirements.txt
 # Run the server
